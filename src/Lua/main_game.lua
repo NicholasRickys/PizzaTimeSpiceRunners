@@ -239,21 +239,39 @@ PTSR.end_location.z == 0 and
 PTSR.end_location.angle == 0
 ) -- returns true if at the defaults
 
-rawset(_G, "PTSR_COUNT", do
+rawset(_G, "PTSR_COUNT", function(returnplayers)
 	local activeCount = 0
 	local inactiveCount = 0
 	local pizzaCount = 0
+	
+	if returnplayers then
+		activeCount = {}
+		inactiveCount = {}
+		pizzaCount = {}
+	end
 
 	for player in players.iterate
 		if player.valid
 			if player.pizzaface then
-				pizzaCount = $+1
+				if not returnplayers then
+					pizzaCount = $+1
+				else
+					table.insert(pizzaCount, player)
+				end
 			end
 			if player.ptsr_outofgame or player.spectator or player.pizzaface or (player.playerstate == PST_DEAD and PTSR.pizzatime)
-				inactiveCount = $+1
+				if not returnplayers then
+					inactiveCount = $+1
+				else
+					table.insert(inactiveCount, player)
+				end
 			end
 		end
-		activeCount = $+1
+		if not returnplayers then
+			activeCount = $+1
+		else
+			table.insert(activeCount, player)
+		end
 	end
 
 	return {

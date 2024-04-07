@@ -158,6 +158,7 @@ addHook("ThinkFrame", do
 end)
 
 addHook("PreThinkFrame", function()
+	local levelsinvote = CV_PTSR.levelsinvote.value
 	for player in players.iterate do
 		local cmd = player.cmd
 		
@@ -175,14 +176,30 @@ addHook("PreThinkFrame", function()
 		
 			-- Selection Increment
 			if not player.ptvote_voted then
-				if cmd.forwardmove < -40 or cmd.sidemove > 40 then
-					if not player.ptvote_down then
+				if cmd.sidemove > 40 then
+					if not player.ptvote_right then
 						S_StartSound(nil, sfx_s3kb7, player)
 					
 						if player.ptvote_selection + 1 > CV_PTSR.levelsinvote.value then
 							player.ptvote_selection = 1
 						else
 							player.ptvote_selection = $ + 1 
+						end
+						
+						player.ptvote_right = true
+					end
+				else
+					player.ptvote_right = false
+				end
+
+				if cmd.forwardmove > 40 then
+					if not player.ptvote_down then
+						S_StartSound(nil, sfx_s3kb7, player)
+					
+						if player.ptvote_selection + (levelsinvote/2) > CV_PTSR.levelsinvote.value then
+							player.ptvote_selection = max(1,$-(levelsinvote/2))
+						else
+							player.ptvote_selection = $+(levelsinvote/2)
 						end
 						
 						player.ptvote_down = true
@@ -192,14 +209,31 @@ addHook("PreThinkFrame", function()
 				end
 				
 				-- Selection Decrement
-				if cmd.forwardmove > 40 or cmd.sidemove < -40 then
-					if not player.ptvote_up then
+				if cmd.sidemove < -40 then
+					if not player.ptvote_left then
 						S_StartSound(nil, sfx_s3kb7, player)
 						
 						if player.ptvote_selection - 1 < 1 then
 							player.ptvote_selection = CV_PTSR.levelsinvote.value
 						else
 							player.ptvote_selection = $ - 1 
+						end
+						
+						player.ptvote_left = true
+					end
+				else
+					player.ptvote_left = false
+				end
+
+				-- Selection Decrement
+				if cmd.forwardmove < -40 then
+					if not player.ptvote_up then
+						S_StartSound(nil, sfx_s3kb7, player)
+						
+						if player.ptvote_selection - (levelsinvote/2) < 1 then
+							player.ptvote_selection = min(levelsinvote, $+(levelsinvote/2))
+						else
+							player.ptvote_selection = $ - (levelsinvote/2)
 						end
 						
 						player.ptvote_up = true
